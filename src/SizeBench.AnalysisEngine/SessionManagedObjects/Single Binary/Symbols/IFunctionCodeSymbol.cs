@@ -26,7 +26,7 @@ public interface IFunctionCodeSymbol
 
     // For member functions, this will be set to the type they belong to.
     // This can be null, such as for free functions.
-    UserDefinedTypeSymbol? ParentType { get; }
+    TypeSymbol? ParentType { get; }
     bool IsMemberFunction { get; }
 
     CodeBlockSymbol PrimaryBlock { get; }

@@ -838,7 +838,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         var primaryBlockLength = GetSymbolLength(primaryBlockSymbol, symbolName);
         var functionType = primaryBlockSymbol.type;
         var functionClassParent = primaryBlockSymbol.classParent;
-        UserDefinedTypeSymbol? classParentUDT = null;
+        TypeSymbol? parentType = null;
 
         List<uint>? symIndexIdsOfBlockOverlappingPrimaryBlock = null;
         var separatedBlocks = ParseSeparatedBlocksFromFunction(primaryBlockSymbol, RVARange.FromRVAAndSize(primaryBlockRVA, primaryBlockLength),
@@ -847,7 +847,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         if (functionClassParent != null)
         {
-            classParentUDT = GetOrCreateTypeSymbol<UserDefinedTypeSymbol>(functionClassParent, cancellationToken);
+            parentType = GetOrCreateTypeSymbol<TypeSymbol>(functionClassParent, cancellationToken);
         }
 
         // The assembler can generate function types that are empty.  This is also the true for compiler-generated functions (like "*filt$0*" functions), so we need to
@@ -870,7 +870,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         if (separatedBlocks is null)
         {
             return new SimpleFunctionCodeSymbol(this.DataCache, symbolName ?? "<unknown name>", primaryBlockRVA, primaryBlockLength, primaryBlockSymbol.symIndexId,
-                                                functionTypeSymbol, argumentNames, classParentUDT, (AccessModifier)primaryBlockSymbol.access,
+                                                functionTypeSymbol, argumentNames, parentType, (AccessModifier)primaryBlockSymbol.access,
                                                 isIntroVirtual: isIntroVirtual,
                                                 isPure: isPure,
                                                 isStatic: isStatic,
@@ -894,7 +894,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
 
             return new ComplexFunctionCodeSymbol(this.DataCache, symbolName ?? "<unknown name>", primaryBlock, separatedBlocks,
-                                                 functionTypeSymbol, argumentNames, classParentUDT, (AccessModifier)primaryBlockSymbol.access,
+                                                 functionTypeSymbol, argumentNames, parentType, (AccessModifier)primaryBlockSymbol.access,
                                                  isIntroVirtual: isIntroVirtual,
                                                  isPure: isPure,
                                                  isStatic: isStatic,
@@ -1805,10 +1805,10 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
 
             var functionClassParent = diaSymbol.classParent;
-            UserDefinedTypeSymbol? classParentUDT = null;
+            TypeSymbol? classParentType = null;
             if (functionClassParent != null)
             {
-                classParentUDT = GetOrCreateTypeSymbol<UserDefinedTypeSymbol>(functionClassParent, cancellationToken);
+                classParentType = GetOrCreateTypeSymbol<TypeSymbol>(functionClassParent, cancellationToken);
             }
 
             var functionType = diaSymbol.type;
@@ -1819,7 +1819,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                                                     isStatic: false /* unused here for this type of name */,
                                                                     isIntroVirtual: false /* unused here for this type of name */,
                                                                     functionTypeSymbol,
-                                                                    classParentUDT,
+                                                                    classParentType,
                                                                     GetSymbolName(diaSymbol)!,
                                                                     argumentNames: null /* unused here for this type of name */,
                                                                     isVirtual: false /* unused here for this type of name */,
